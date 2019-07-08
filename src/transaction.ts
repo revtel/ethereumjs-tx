@@ -9,6 +9,7 @@ import {
   toBuffer,
   rlp,
   stripZeros,
+  ECDSASignature,
 } from 'ethereumjs-util'
 import Common from 'ethereumjs-common'
 import { Buffer } from 'buffer'
@@ -17,6 +18,9 @@ import { BufferLike, PrefixedHexString, TxData, TransactionOptions } from './typ
 // secp256k1n/2
 const N_DIV_2 = new BN('7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0', 16)
 
+interface EcSignAsync {
+  (msgHash: Buffer, privateKey: Buffer): Promise<ECDSASignature>;
+}
 /**
  * An Ethereum transaction.
  */
@@ -268,6 +272,23 @@ export default class Transaction {
 
     const msgHash = this.hash(false)
     const sig = ecsign(msgHash, privateKey)
+
+    if (this._implementsEIP155()) {
+      sig.v += this.getChainId() * 2 + 8
+    }
+
+    Object.assign(this, sig)
+  }
+
+  async signAsync(privateKey: Buffer, ecSignAsync: EcSignAsync) {
+    // We clear any previous signature before signing it. Otherwise, _implementsEIP155's can give
+    // different results if this tx was already signed.
+    this.v = new Buffer([])
+    this.s = new Buffer([])
+    this.r = new Buffer([])
+
+    const msgHash = this.hash(false)
+    const sig = await ecSignAsync(msgHash, privateKey);
 
     if (this._implementsEIP155()) {
       sig.v += this.getChainId() * 2 + 8
