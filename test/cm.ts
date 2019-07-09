@@ -5,6 +5,7 @@ import {
   ecsign,
 } from 'ethereumjs-util'
 const secp256k1 = require('secp256k1');
+const ethLibAccount = require('../eth-lib/account');
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const ecSignAsync1 = async (msgHash: Buffer, privateKey: Buffer) => {
@@ -115,6 +116,13 @@ const ecSignAsync3 = async (
   return ret;
 }
 
+// tape('async tx', function(t) {
+//   t.test('baseline', async function(st) {
+//     st.equals(true, true);
+//     st.end();
+//   })
+// });
+
 tape('async tx', function(t) {
   t.test('baseline', async function(st) {
     let rawTx = { 
@@ -165,5 +173,12 @@ tape('async tx', function(t) {
     st.equals(tx.verifySignature(), true);
     st.end()
 
+  }),
+
+  t.test('create account', async (st) => {
+    let account = ethLibAccount.create();
+    console.log(account);
+    st.equals(true, true);
+    st.end()
   })
 });
