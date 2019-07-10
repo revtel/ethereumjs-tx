@@ -1,0 +1,13 @@
+{
+  "name": "cmecc",
+  "version": "1.0.0",
+  "main": "bindings.js",
+  "scripts": {
+    "clean": "rm -rf build node_modules",
+    "build": "node-gyp build",
+    "install": "node-gyp rebuild"
+  },
+  "dependencies": {
+    "nan": "^2.7.0"
+  }
+}
