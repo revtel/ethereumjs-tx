@@ -280,6 +280,30 @@ export default class Transaction {
     Object.assign(this, sig)
   }
 
+  // cm-wallet only
+  _clearSignature() {
+    this.v = new Buffer([])
+    this.s = new Buffer([])
+    this.r = new Buffer([])
+  }
+
+  // cm-wallet only
+  cmGetHash(): Buffer {
+    this._clearSignature();
+    return this.hash(false);
+  }
+
+  // cm-wallet only
+  cmPostSign(sig: ECDSASignature) {
+    this._clearSignature();
+    if (this._implementsEIP155()) {
+      sig.v += this.getChainId() * 2 + 8
+    }
+
+    Object.assign(this, sig)
+  }
+
+  // cm-wallet only
   async signAsync(privateKey: Buffer, ecSignAsync: EcSignAsync) {
     // We clear any previous signature before signing it. Otherwise, _implementsEIP155's can give
     // different results if this tx was already signed.
